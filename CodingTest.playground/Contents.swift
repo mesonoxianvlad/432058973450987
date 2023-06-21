@@ -21,7 +21,7 @@ struct VehiclesService: VehicleListService {
     
     // Use the client to get the vehicles from the `vehiclesEndpoint`
     // If success, complete with the vehicles.
-    // If failure, complete with an appropriate `ServerError`
+    // If failure, complete with an appropriate `ServiceError`
     func fetchVehicles(_ completion: @escaping (Result<[Vehicle], ServiceError>) -> ()) {
         
     }
