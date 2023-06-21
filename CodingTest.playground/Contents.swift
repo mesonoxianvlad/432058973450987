@@ -1,47 +1,15 @@
 import Foundation
 
-// MARK: Util
-protocol AlertPresenter {
-    func presentYesNoAlert(title: String, message: String, onYes: @escaping () -> (), onNo: @escaping () -> ())
-}
-
-protocol VehicleListViewModelDelegate: AnyObject {
-    func viewModel(_ viewModel: VehicleListViewModel, didFetchVehicleList vehiclesList: [Vehicle])
-    func viewModelCloseList(_ viewModel: VehicleListViewModel)
-}
-
-struct Vehicle: Decodable {
-    let name: String
-}
-
-
-
-// MARK: - Network Client
-
-struct MockNetworkClient: NetworkClient {
-    func get(endpoint: String, completion: @escaping (Result<Data, NetworkError>) -> Void) {
-        let vehicles = "[{\"name\":\"Test Vehicle\"},{\"name\":\"Other Test Vehicle\"},{\"name\":\"Some Test Vehicle\"},{\"name\":\"Another Test Vehicle\"}]".data(using: .utf8)!
-        
-        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 2) {
-            completion(.success(vehicles))
-        }
-    }
-}
-
-protocol NetworkClient {
-    func get(endpoint: String, completion: @escaping (Result<Data, NetworkError>) -> Void)
-}
-
-struct NetworkError: Error {
-    let code: Int
-}
-
-struct ServiceError: Error {
-    let message: String
-}
 
 
 // MARK: - Vehicle Service
+
+
+protocol VehicleListService {
+    var client: NetworkClient { get }
+    
+    func fetchVehicles(_ completion: @escaping (Result<[Vehicle], ServiceError>) -> ())
+}
 
 struct VehiclesService: VehicleListService {
     let client: NetworkClient
@@ -59,20 +27,15 @@ struct VehiclesService: VehicleListService {
     }
 }
 
-protocol VehicleListService {
-    var client: NetworkClient { get }
-    
-    func fetchVehicles(_ completion: @escaping (Result<[Vehicle], ServiceError>) -> ())
-}
-
 
 
 // MARK: - ViewModel
-
-enum LoadingState {
-    case loading
-    case normal
+protocol VehicleListViewModelDelegate: AnyObject {
+    func viewModel(_ viewModel: VehicleListViewModel, didFetchVehicleList vehiclesList: [Vehicle])
+    func viewModelCloseList(_ viewModel: VehicleListViewModel)
 }
+
+
 
 class VehicleListViewModel {
     private let alertPresenter: AlertPresenter
